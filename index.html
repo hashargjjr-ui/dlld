@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewportcontent="width=device-width, initial-scale=1.0">
+  <title>SolarTrack Pro — Automatic Solar Tracker System</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <style>
+  body { font-family: 'Space Grotesk', sans-serif; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  
+  .bg-grid {
+    background-image: 
+      linear-gradient(rgba(251, 191, 36, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(251, 191, 36, 0.06) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+  
+  .sun-glow {
+    background: radial-gradient(circle, #fbbf24 0%, #f59e0b 40%, transparent 70%);
+    filter: blur(20px);
+  }
+  
+  @keyframes rotate-sun {
+    0% { transform: rotate(-45deg); }
+    50% { transform: rotate(45deg); }
+    100% { transform: rotate(-45deg); }
+  }
+  
+  @keyframes pulse-ray {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+  
+  @keyframes float-sun {
+    0% { left: 10%; top: 30%; }
+    50% { left: 80%; top: 20%; }
+    100% { left: 10%; top: 30%; }
+  }
+  
+  .panel-track {
+    animation: rotate-sun 8s ease-in-out infinite;
+    transform-origin: bottom center;
+  }
+  
+  .sun-float {
+    animation: float-sun 8s ease-in-out infinite;
+  }
+  
+  .ray {
+    animation: pulse-ray 2s ease-in-out infinite;
+  }
+  
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .fade-up { animation: fade-up 0.8s ease-out backwards; }
+
+  @keyframes float-3d {
+    0%, 100% { transform: translate(0, 0) rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+    25% { transform: translate(30px, -20px) rotateX(15deg) rotateY(25deg) rotateZ(-10deg); }
+    50% { transform: translate(-20px, -40px) rotateX(-20deg) rotateY(-15deg) rotateZ(20deg); }
+    75% { transform: translate(-30px, 20px) rotateX(10deg) rotateY(35deg) rotateZ(-15deg); }
+  }
+
+  @keyframes orbit {
+    0% { transform: rotateX(75deg) rotateY(0deg); }
+    100% { transform: rotateX(75deg) rotateY(360deg); }
+  }
+
+  .floating-cube {
+    animation: float-3d 15s ease-in-out infinite;
+    perspective: 1000px;
+  }
+
+  .orbit-container {
+    animation: orbit 20s linear infinite;
+    transform-style: preserve-3d;
+  }
+
+  .cube-face {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(249, 115, 22, 0.08) 100%);
+    border: 1px solid rgba(251, 191, 36, 0.15);
+    backdrop-filter: blur(10px);
+  }
+
+  .orbit-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: radial-gradient(circle, rgba(251, 191, 36, 0.4), transparent);
+    border-radius: 50%;
+  }
+  
+  .gradient-text {
+    background: linear-gradient(135deg, #fbbf24 0%, #f97316 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
+  .card-hover {
+    transition: all 0.3s ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-4px);
+    border-color: #fbbf24;
+  }
+  
+  .ldr-blink {
+    animation: pulse-ray 1.5s ease-in-out infinite;
+  }
+</style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full w-full bg-slate-950 text-slate-100">
+  <div class="h-full w-full overflow-auto bg-grid"><!-- NAVIGATION -->
+   <header class="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/70 border-b border-slate-800">
+    <nav class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+     <div class="flex items-center gap-2">
+      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center"><i data-lucide="sun" class="w-5 h-5 text-slate-900"></i>
+      </div><span class="font-bold text-lg">SolarTrack<span class="text-amber-400">Pro</span></span>
+     </div>
+     <div class="hidden md:flex items-center gap-8 text-sm text-slate-300"><a href="#about" class="hover:text-amber-400 transition">About</a> <a href="#team" class="hover:text-amber-400 transition">Team</a> <a href="#types" class="hover:text-amber-400 transition">Types</a> <a href="#how" class="hover:text-amber-400 transition">How It Works</a> <a href="#efficiency" class="hover:text-amber-400 transition">Efficiency</a> <a href="#components" class="hover:text-amber-400 transition">Components</a> <a href="#results" class="hover:text-amber-400 transition">Results</a>
+     </div><a href="#contact" class="px-4 py-2 bg-amber-400 text-slate-900 rounded-lg font-semibold text-sm hover:bg-amber-300 transition">Contact</a>
+    </nav>
+   </header>
+   <main><!-- HERO -->
+    <section class="relative max-w-7xl mx-auto px-6 py-16 md:py-24 overflow-hidden"><!-- 3D Background Animations -->
+     <div class="absolute top-10 right-20 w-32 h-32 pointer-events-none opacity-40">
+      <div class="floating-cube w-full h-full" style="perspective: 1000px;">
+       <div style="position: relative; width: 100%; height: 100%; transform-style: preserve-3d;">
+        <div class="cube-face" style="transform: translateZ(30px); background: rgba(251, 191, 36, 0.05);"></div>
+        <div class="cube-face" style="transform: rotateY(90deg) translateZ(30px); background: rgba(249, 115, 22, 0.05);"></div>
+        <div class="cube-face" style="transform: rotateY(180deg) translateZ(30px); background: rgba(251, 191, 36, 0.05);"></div>
+        <div class="cube-face" style="transform: rotateY(270deg) translateZ(30px); background: rgba(249, 115, 22, 0.05);"></div>
+       </div>
+      </div>
+     </div>
+     <div class="absolute bottom-32 -left-16 w-40 h-40 pointer-events-none opacity-30">
+      <div class="orbit-container" style="width: 100%; height: 100%; position: relative;">
+       <div class="orbit-dot" style="left: 50%; top: 0; transform: translateX(-50%);"></div>
+       <div class="orbit-dot" style="right: 0; top: 50%; transform: translateY(-50%);"></div>
+       <div class="orbit-dot" style="left: 50%; bottom: 0; transform: translateX(-50%);"></div>
+       <div class="orbit-dot" style="left: 0; top: 50%; transform: translateY(-50%);"></div>
+      </div>
+     </div>
+     <div class="grid md:grid-cols-2 gap-12 items-center">
+      <div class="fade-up">
+       <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 mb-6"><span class="w-2 h-2 rounded-full bg-amber-400 ldr-blink"></span> <span class="mono text-xs text-amber-300">ENGINEERING PROJECT · 2025</span>
+       </div>
+       <h1 id="hero-title" class="text-5xl md:text-6xl font-bold leading-tight mb-4">Automatic <span class="gradient-text">Solar Tracker</span> System</h1>
+       <p id="hero-subtitle" class="text-xl text-slate-300 mb-3">Smart dual-axis tracking for maximum solar energy harvest</p>
+       <p id="hero-tagline" class="text-slate-400 mb-8">Follows the sun from dawn to dusk — boosting efficiency by up to 40% compared to fixed panels.</p>
+       <div class="flex flex-wrap gap-4"><a href="#how" class="px-6 py-3 bg-amber-400 text-slate-900 rounded-lg font-semibold hover:bg-amber-300 transition flex items-center gap-2"> Explore Project <i data-lucide="arrow-right" class="w-4 h-4"></i> </a> <a href="#team" class="px-6 py-3 border border-slate-700 rounded-lg font-semibold hover:border-amber-400 hover:text-amber-400 transition">Meet the Team</a>
+       </div>
+       <div class="grid grid-cols-3 gap-6 mt-12 pt-8 border-t border-slate-800">
+        <div>
+         <div class="text-3xl font-bold text-amber-400">
+          40%
+         </div>
+         <div class="text-xs text-slate-400 mt-1">
+          More Efficient
+         </div>
+        </div>
+        <div>
+         <div class="text-3xl font-bold text-amber-400">
+          2-Axis
+         </div>
+         <div class="text-xs text-slate-400 mt-1">
+          Tracking
+         </div>
+        </div>
+        <div>
+         <div class="text-3xl font-bold text-amber-400">
+          24/7
+         </div>
+         <div class="text-xs text-slate-400 mt-1">
+          Automated
+         </div>
+        </div>
+       </div>
+      </div><!-- Animated Solar Tracker Illustration -->
+      <div class="relative h-96 md:h-[450px] rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 overflow-hidden"><!-- Sky background -->
+       <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-900 to-orange-950/30"></div><!-- Sun -->
+       <div class="absolute sun-float">
+        <div class="relative">
+         <div class="sun-glow w-24 h-24"></div>
+         <div class="absolute top-4 left-4 w-16 h-16 rounded-full bg-gradient-to-br from-yellow-200 to-amber-500 shadow-2xl"></div>
+        </div>
+       </div><!-- Ground -->
+       <div class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-slate-800 to-transparent"></div><!-- Solar Panel with Tracking -->
+       <div class="absolute bottom-16 left-1/2 -translate-x-1/2"><!-- Pole -->
+        <div class="w-2 h-32 bg-gradient-to-b from-slate-600 to-slate-700 mx-auto"></div><!-- Base -->
+        <div class="w-16 h-3 bg-slate-700 rounded -mt-1 mx-auto"></div>
+       </div>
+       <div class="absolute bottom-40 left-1/2 -translate-x-1/2 panel-track"><!-- Panel -->
+        <div class="w-32 h-20 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 rounded-sm border-2 border-slate-600 relative shadow-2xl">
+         <div class="grid grid-cols-4 grid-rows-3 gap-0.5 p-1 h-full">
+          <div class="bg-blue-700/60 rounded-sm"></div>
+          <div class="bg-blue-700/60 rounded-sm"></div>
+          <div class="bg-blue-700/60 rounded-sm"></div>
+          <div class="bg-blue-700/60 rounded-sm"></div>
+          <div class="bg-blue-700/60 rounded-sm"></div>
+          <div class="bg-blue-700/60 rounded-sm"></div>
+          <div class="bg-blue-700/60 rounded-sm"></div>
+          <div class="bg-blue-700/60 rounded-sm"></div>
+          <div class="bg-blue-700/60 rounded-sm"></div>
+          <div class="bg-blue-700/60 rounded-sm"></div>
+          <div class="bg-blue-700/60 rounded-sm"></div>
+          <div class="bg-blue-700/60 rounded-sm"></div>
+         </div>
+        </div>
+       </div><!-- Status badge -->
+       <div class="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-slate-900/80 backdrop-blur border border-amber-400/40 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-400 ldr-blink"></span> <span class="mono text-xs text-slate-300">TRACKING · ACTIVE</span>
+       </div><!-- Readout -->
+       <div class="absolute bottom-4 left-4 px-3 py-2 rounded-lg bg-slate-900/80 backdrop-blur border border-slate-700">
+        <div class="mono text-[10px] text-slate-400">
+         LDR-N / LDR-S
+        </div>
+        <div class="mono text-xs text-amber-400">
+         823 / 817 lux
+        </div>
+       </div>
+      </div>
+     </div>
+    </section><!-- TEAM -->
+    <section id="team" class="max-w-7xl mx-auto px-6 py-16">
+     <div class="text-center mb-12">
+      <div class="mono text-xs text-amber-400 mb-3">
+       // TEAM MEMBERS
+      </div>
+      <h2 id="team-title" class="text-4xl font-bold mb-4">Meet the Team</h2>
+      <p id="team-subtitle" class="text-slate-400 max-w-2xl mx-auto">Brilliant minds collaborating to bring solar innovation to life.</p>
+     </div>
+     <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6 text-center card-hover">
+       <div class="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 mx-auto mb-4 flex items-center justify-center">
+        <i data-lucide="user" class="w-8 h-8 text-slate-900"></i>
+       </div>
+       <h3 class="font-bold text-lg mb-1">Hareem Zafar</h3>
+       <p class="text-xs text-slate-400">Team Member</p>
+      </div>
+      <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6 text-center card-hover">
+       <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 mx-auto mb-4 flex items-center justify-center">
+        <i data-lucide="user" class="w-8 h-8 text-slate-900"></i>
+       </div>
+       <h3 class="font-bold text-lg mb-1">Faizan Munir</h3>
+       <p class="text-xs text-slate-400">Team Member</p>
+      </div>
+      <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6 text-center card-hover">
+       <div class="w-16 h-16 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 mx-auto mb-4 flex items-center justify-center">
+        <i data-lucide="user" class="w-8 h-8 text-slate-900"></i>
+       </div>
+       <h3 class="font-bold text-lg mb-1">Irfan Sher</h3>
+       <p class="text-xs text-slate-400">Team Member</p>
+      </div>
+      <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6 text-center card-hover">
+       <div class="w-16 h-16 rounded-full bg-gradient-to-br from-rose-400 to-rose-600 mx-auto mb-4 flex items-center justify-center">
+        <i data-lucide="user" class="w-8 h-8 text-slate-900"></i>
+       </div>
+       <h3 class="font-bold text-lg mb-1">Ali Ahsan</h3>
+       <p class="text-xs text-slate-400">Team Member</p>
+      </div>
+      <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6 text-center card-hover">
+       <div class="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 mx-auto mb-4 flex items-center justify-center">
+        <i data-lucide="user" class="w-8 h-8 text-slate-900"></i>
+       </div>
+       <h3 class="font-bold text-lg mb-1">Hashar</h3>
+       <p class="text-xs text-slate-400">Team Member</p>
+      </div>
+      <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6 text-center card-hover">
+       <div class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 mx-auto mb-4 flex items-center justify-center">
+        <i data-lucide="user" class="w-8 h-8 text-slate-900"></i>
+       </div>
+       <h3 class="font-bold text-lg mb-1">Abdullah</h3>
+       <p class="text-xs text-slate-400">Team Member</p>
+      </div>
+      <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6 text-center card-hover">
+       <div class="w-16 h-16 rounded-full bg-gradient-to-br from-violet-400 to-violet-600 mx-auto mb-4 flex items-center justify-center">
+        <i data-lucide="user" class="w-8 h-8 text-slate-900"></i>
+       </div>
+       <h3 class="font-bold text-lg mb-1">Zain</h3>
+       <p class="text-xs text-slate-400">Team Member</p>
+      </div>
+     </div>
+    </section>
+    <section id="about" class="max-w-7xl mx-auto px-6 py-16">
+     <div class="grid md:grid-cols-2 gap-12">
+      <div>
+       <div class="mono text-xs text-amber-400 mb-3">
+        // ABOUT THE PROJECT
+       </div>
+       <h2 id="about-title" class="text-4xl font-bold mb-6">Engineered to follow the sun</h2>
+       <p id="about-description" class="text-slate-300 leading-relaxed mb-6">The Automatic Solar Tracker System is an intelligent electromechanical device designed to keep a solar panel perpendicular to the sun throughout the day. Using light-dependent resistors (LDRs) and a microcontroller, it continuously adjusts the panel's orientation to capture maximum sunlight — significantly outperforming stationary panels.</p>
+       <div class="space-y-3">
+        <div class="flex items-start gap-3">
+         <div class="w-8 h-8 rounded-lg bg-amber-400/10 border border-amber-400/30 flex items-center justify-center flex-shrink-0"><i data-lucide="check" class="w-4 h-4 text-amber-400"></i>
+         </div>
+         <div>
+          <div class="font-semibold">
+           Real-time Sun Tracking
+          </div>
+          <div class="text-sm text-slate-400">
+           Responds to changing light conditions within seconds
+          </div>
+         </div>
+        </div>
+        <div class="flex items-start gap-3">
+         <div class="w-8 h-8 rounded-lg bg-amber-400/10 border border-amber-400/30 flex items-center justify-center flex-shrink-0"><i data-lucide="check" class="w-4 h-4 text-amber-400"></i>
+         </div>
+         <div>
+          <div class="font-semibold">
+           Energy Efficient
+          </div>
+          <div class="text-sm text-slate-400">
+           Low-power servos only move when needed
+          </div>
+         </div>
+        </div>
+        <div class="flex items-start gap-3">
+         <div class="w-8 h-8 rounded-lg bg-amber-400/10 border border-amber-400/30 flex items-center justify-center flex-shrink-0"><i data-lucide="check" class="w-4 h-4 text-amber-400"></i>
+         </div>
+         <div>
+          <div class="font-semibold">
+           Affordable &amp; Scalable
+          </div>
+          <div class="text-sm text-slate-400">
+           Built with accessible components and open hardware
+          </div>
+         </div>
+        </div>
+       </div>
+      </div><!-- Objectives card -->
+      <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-8">
+       <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 rounded-lg bg-amber-400/10 border border-amber-400/30 flex items-center justify-center"><i data-lucide="target" class="w-5 h-5 text-amber-400"></i>
+        </div>
+        <h3 class="text-xl font-bold">Project Objectives</h3>
+       </div>
+       <ol class="space-y-4">
+        <li class="flex gap-4"><span class="mono text-amber-400 font-bold">01</span> <span class="text-slate-300">Design a system that automatically aligns a solar panel with the sun's position.</span></li>
+        <li class="flex gap-4"><span class="mono text-amber-400 font-bold">02</span> <span class="text-slate-300">Maximize solar energy output compared to fixed-position panels.</span></li>
+        <li class="flex gap-4"><span class="mono text-amber-400 font-bold">03</span> <span class="text-slate-300">Use low-cost components and accessible microcontroller programming.</span></li>
+        <li class="flex gap-4"><span class="mono text-amber-400 font-bold">04</span> <span class="text-slate-300">Demonstrate a scalable prototype for renewable energy applications.</span></li>
+       </ol>
+      </div>
+     </div>
+    </section><!-- TYPES OF SOLAR TRACKERS -->
+    <section id="types" class="max-w-7xl mx-auto px-6 py-16">
+     <div class="text-center mb-12">
+      <div class="mono text-xs text-amber-400 mb-3">
+       // TRACKER CATEGORIES
+      </div>
+      <h2 class="text-4xl font-bold mb-4">Types of Solar Trackers</h2>
+      <p class="text-slate-400 max-w-2xl mx-auto">Different tracking systems optimized for various applications and environments.</p>
+     </div>
+     <div class="grid md:grid-cols-2 gap-8"><!-- Single-Axis Tracker -->
+      <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-8 card-hover">
+       <div class="flex items-center gap-4 mb-6">
+        <div class="w-14 h-14 rounded-lg bg-gradient-to-br from-blue-400/20 to-blue-600/20 border border-blue-400/30 flex items-center justify-center"><i data-lucide="arrow-right" class="w-7 h-7 text-blue-400"></i>
+        </div>
+        <h3 class="text-2xl font-bold">Single-Axis Tracker</h3>
+       </div>
+       <p class="text-slate-300 mb-6">Rotates the solar panel on one axis (typically horizontal/east-west), tracking the sun's azimuth throughout the day.</p>
+       <div class="space-y-3 mb-6">
+        <div class="flex gap-3"><span class="text-amber-400 font-bold">+</span> <span class="text-slate-400">Simple mechanical design and affordable</span>
+        </div>
+        <div class="flex gap-3"><span class="text-amber-400 font-bold">+</span> <span class="text-slate-400">Easy to maintain and repair</span>
+        </div>
+        <div class="flex gap-3"><span class="text-amber-400 font-bold">+</span> <span class="text-slate-400">15-25% efficiency gain over fixed panels</span>
+        </div>
+        <div class="flex gap-3"><span class="text-red-400 font-bold">−</span> <span class="text-slate-400">Cannot track seasonal elevation changes</span>
+        </div>
+       </div>
+       <div class="px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg"><span class="mono text-xs text-slate-400">Best for: </span> <span class="text-slate-300">Utility-scale farms, stationary installations</span>
+       </div>
+      </div><!-- Dual-Axis Tracker -->
+      <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-8 card-hover">
+       <div class="flex items-center gap-4 mb-6">
+        <div class="w-14 h-14 rounded-lg bg-gradient-to-br from-amber-400/20 to-orange-500/20 border border-amber-400/30 flex items-center justify-center"><i data-lucide="move-3d" class="w-7 h-7 text-amber-400"></i>
+        </div>
+        <h3 class="text-2xl font-bold">Dual-Axis Tracker</h3>
+       </div>
+       <p class="text-slate-300 mb-6">Tracks both horizontal (azimuth) and vertical (elevation) movements, keeping the panel perpendicular to the sun all day and across seasons.</p>
+       <div class="space-y-3 mb-6">
+        <div class="flex gap-3"><span class="text-amber-400 font-bold">+</span> <span class="text-slate-400">Maximum solar energy capture</span>
+        </div>
+        <div class="flex gap-3"><span class="text-amber-400 font-bold">+</span> <span class="text-slate-400">30-40% efficiency gain over fixed panels</span>
+        </div>
+        <div class="flex gap-3"><span class="text-amber-400 font-bold">+</span> <span class="text-slate-400">Works year-round effectively</span>
+        </div>
+        <div class="flex gap-3"><span class="text-red-400 font-bold">−</span> <span class="text-slate-400">More complex, higher maintenance cost</span>
+        </div>
+       </div>
+       <div class="px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg"><span class="mono text-xs text-slate-400">Best for: </span> <span class="text-slate-300">Residential systems, experimental projects (our system!)</span>
+       </div>
+      </div><!-- Fixed System -->
+      <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-8 card-hover">
+       <div class="flex items-center gap-4 mb-6">
+        <div class="w-14 h-14 rounded-lg bg-gradient-to-br from-slate-400/20 to-slate-600/20 border border-slate-400/30 flex items-center justify-center"><i data-lucide="square" class="w-7 h-7 text-slate-400"></i>
+        </div>
+        <h3 class="text-2xl font-bold">Fixed System</h3>
+       </div>
+       <p class="text-slate-300 mb-6">Stationary solar panels installed at a fixed angle, typically tilted toward the equator at the location's latitude angle.</p>
+       <div class="space-y-3 mb-6">
+        <div class="flex gap-3"><span class="text-amber-400 font-bold">+</span> <span class="text-slate-400">Lowest cost and maintenance</span>
+        </div>
+        <div class="flex gap-3"><span class="text-amber-400 font-bold">+</span> <span class="text-slate-400">Reliable and long-lasting</span>
+        </div>
+        <div class="flex gap-3"><span class="text-amber-400 font-bold">+</span> <span class="text-slate-400">No moving parts to fail</span>
+        </div>
+        <div class="flex gap-3"><span class="text-red-400 font-bold">−</span> <span class="text-slate-400">Cannot adapt to sun's movement</span>
+        </div>
+       </div>
+       <div class="px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg"><span class="mono text-xs text-slate-400">Best for: </span> <span class="text-slate-300">Budget-conscious installations, large arrays</span>
+       </div>
+      </div><!-- Passive vs Active -->
+      <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-8 card-hover">
+       <div class="flex items-center gap-4 mb-6">
+        <div class="w-14 h-14 rounded-lg bg-gradient-to-br from-purple-400/20 to-purple-600/20 border border-purple-400/30 flex items-center justify-center"><i data-lucide="zap" class="w-7 h-7 text-purple-400"></i>
+        </div>
+        <h3 class="text-2xl font-bold">Control Methods</h3>
+       </div>
+       <div class="space-y-4">
+        <div>
+         <div class="font-semibold text-amber-400 mb-2">
+          Active Tracking (Our System)
+         </div>
+         <p class="text-slate-400 text-sm">Uses sensors (LDRs) and motors with microcontroller algorithms to continuously track sunlight. Requires power but delivers maximum efficiency.</p>
+        </div>
+        <div class="border-t border-slate-700 pt-4">
+         <div class="font-semibold text-slate-300 mb-2">
+          Passive Tracking
+         </div>
+         <p class="text-slate-400 text-sm">Uses thermal expansion of fluids in tubes to shift weight and reposition. No electrical power needed, but less accurate and slower response.</p>
+        </div>
+       </div>
+      </div>
+     </div>
+    </section><!-- EFFICIENCY COMPARISON -->
+    <section id="efficiency" class="max-w-7xl mx-auto px-6 py-16">
+     <div class="text-center mb-12">
+      <div class="mono text-xs text-amber-400 mb-3">
+       // PERFORMANCE ANALYSIS
+      </div>
+      <h2 class="text-4xl font-bold mb-4">Efficiency Comparison</h2>
+      <p class="text-slate-400 max-w-2xl mx-auto">Detailed breakdown of how different solar tracker systems compare in real-world conditions.</p>
+     </div><!-- Main Comparison Chart -->
+     <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-8 mb-8">
+      <h3 class="text-2xl font-bold mb-8">Daily Energy Output Comparison</h3>
+      <div class="space-y-6"><!-- Fixed Panel -->
+       <div>
+        <div class="flex justify-between items-center mb-3">
+         <div class="flex items-center gap-3">
+          <div class="w-4 h-4 rounded bg-slate-600"></div><span class="font-semibold">Fixed Solar Panel</span>
+         </div><span class="mono text-amber-400 font-bold">100% (Baseline)</span>
+        </div>
+        <div class="w-full h-3 rounded-full bg-slate-800 overflow-hidden">
+         <div class="h-full bg-slate-600 rounded-full" style="width: 100%"></div>
+        </div>
+        <p class="text-xs text-slate-400 mt-2">5.2 kWh average daily output</p>
+       </div><!-- Single-Axis Tracker -->
+       <div>
+        <div class="flex justify-between items-center mb-3">
+         <div class="flex items-center gap-3">
+          <div class="w-4 h-4 rounded bg-blue-500"></div><span class="font-semibold">Single-Axis Tracker</span>
+         </div><span class="mono text-blue-400 font-bold">+20%</span>
+        </div>
+        <div class="w-full h-3 rounded-full bg-slate-800 overflow-hidden">
+         <div class="h-full bg-blue-500 rounded-full" style="width: 120%"></div>
+        </div>
+        <p class="text-xs text-slate-400 mt-2">6.2 kWh average daily output</p>
+       </div><!-- Dual-Axis Tracker -->
+       <div>
+        <div class="flex justify-between items-center mb-3">
+         <div class="flex items-center gap-3">
+          <div class="w-4 h-4 rounded bg-gradient-to-r from-amber-400 to-orange-500"></div><span class="font-semibold">Dual-Axis Tracker (Our System)</span>
+         </div><span class="mono text-amber-400 font-bold">+40%</span>
+        </div>
+        <div class="w-full h-3 rounded-full bg-slate-800 overflow-hidden">
+         <div class="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full" style="width: 140%"></div>
+        </div>
+        <p class="text-xs text-slate-400 mt-2">7.3 kWh average daily output</p>
+       </div>
+      </div>
+     </div><!-- Detailed Metrics Grid -->
+     <div class="grid md:grid-cols-3 gap-6 mb-8"><!-- Morning Performance -->
+      <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
+       <div class="flex items-center gap-2 mb-4"><i data-lucide="sunrise" class="w-5 h-5 text-amber-300"></i>
+        <h4 class="font-bold">Morning (6-9 AM)</h4>
+       </div>
+       <div class="space-y-3">
+        <div><span class="text-xs text-slate-400">Fixed</span>
+         <div class="text-lg font-bold text-slate-300">
+          45%
+         </div>
+        </div>
+        <div><span class="text-xs text-slate-400">Single-Axis</span>
+         <div class="text-lg font-bold text-blue-400">
+          72%
+         </div>
+        </div>
+        <div><span class="text-xs text-slate-400">Dual-Axis</span>
+         <div class="text-lg font-bold text-amber-400">
+          88%
+         </div>
+        </div>
+       </div>
+      </div><!-- Noon Performance -->
+      <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
+       <div class="flex items-center gap-2 mb-4"><i data-lucide="sun" class="w-5 h-5 text-yellow-400"></i>
+        <h4 class="font-bold">Noon (11 AM - 1 PM)</h4>
+       </div>
+       <div class="space-y-3">
+        <div><span class="text-xs text-slate-400">Fixed</span>
+         <div class="text-lg font-bold text-slate-300">
+          92%
+         </div>
+        </div>
+        <div><span class="text-xs text-slate-400">Single-Axis</span>
+         <div class="text-lg font-bold text-blue-400">
+          97%
+         </div>
+        </div>
+        <div><span class="text-xs text-slate-400">Dual-Axis</span>
+         <div class="text-lg font-bold text-amber-400">
+          99%
+         </div>
+        </div>
+       </div>
+      </div><!-- Evening Performance -->
+      <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6">
+       <div class="flex items-center gap-2 mb-4"><i data-lucide="sunset" class="w-5 h-5 text-orange-400"></i>
+        <h4 class="font-bold">Evening (3-6 PM)</h4>
+       </div>
+       <div class="space-y-3">
+        <div><span class="text-xs text-slate-400">Fixed</span>
+         <div class="text-lg font-bold text-slate-300">
+          38%
+         </div>
+        </div>
+        <div><span class="text-xs text-slate-400">Single-Axis</span>
+         <div class="text-lg font-bold text-blue-400">
+          68%
+         </div>
+        </div>
+        <div><span class="text-xs text-slate-400">Dual-Axis</span>
+         <div class="text-lg font-bold text-amber-400">
+          85%
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Efficiency Across Seasons -->
+     <div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-8">
+      <h3 class="text-2xl font-bold mb-8">Seasonal Efficiency Performance</h3>
+      <div class="grid md:grid-cols-4 gap-4"><!-- Spring -->
+       <div class="bg-slate-950/50 border border-slate-700 rounded-lg p-6">
+        <div class="text-sm text-slate-400 mb-4">
+         SPRING (Mar-May)
+        </div>
+        <div class="space-y-3">
+         <div>
+          <div class="flex justify-between mb-1"><span class="text-xs text-slate-400">Fixed</span> <span class="text-xs text-slate-400">100%</span>
+          </div>
+          <div class="w-full h-2 rounded bg-slate-800">
+           <div class="h-full bg-slate-600 rounded" style="width: 100%"></div>
+          </div>
+         </div>
+         <div>
+          <div class="flex justify-between mb-1"><span class="text-xs text-slate-400">Single-Axis</span> <span class="text-xs text-blue-400">118%</span>
+          </div>
+          <div class="w-full h-2 rounded bg-slate-800">
+           <div class="h-full bg-blue-500 rounded" style="width: 118%"></div>
+          </div>
+         </div>
+         <div>
+          <div class="flex justify-between mb-1"><span class="text-xs text-slate-400">Dual-Axis</span> <span class="text-xs text-amber-400">135%</span>
+          </div>
+          <div class="w-full h-2 rounded bg-slate-800">
+           <div class="h-full bg-amber-400 rounded" style="width: 135%"></div>
+          </div>
+         </div>
+        </div>
+       </div><!-- Summer -->
+       <div class="bg-slate-950/50 border border-slate-700 rounded-lg p-6">
+        <div class="text-sm text-slate-400 mb-4">
+         SUMMER (Jun-Aug)
+        </div>
+        <div class="space-y-3">
+         <div>
+          <div class="flex justify-between mb-1"><span class="text-xs text-slate-400">Fixed</span> <span class="text-xs text-slate-400">100%</span>
+          </div>
+          <div class="w-full h-2 rounded bg-slate-800">
+           <div class="h-full bg-slate-600 rounded" style="width: 100%"></div>
+          </div>
+         </div>
+         <div>
+          <div class="flex justify-between mb-1"><span class="text-xs text-slate-400">Single-Axis</span> <span class="text-xs text-blue-400">115%</span>
+          </div>
+          <div class="w-full h-2 rounded bg-slate-800">
+           <div class="h-full bg-blue-500 rounded" style="width: 115%"></div>
+          </div>
+         </div>
+         <div>
+          <div class="flex justify-between mb-1"><span class="text-xs text-slate-400">Dual-Axis</span> <span class="text-xs text-amber-400">138%</span>
+          </div>
+          <div class="w-full h-2 rounded bg-slate-800">
+           <div class="h-full bg-amber-400 rounded" style="width: 138%"></div>
+          </div>
+         </div>
+        </div>
+       </div><!-- Fall -->
+       <div class="bg-slate-950/50 border border-slate-700 rounded-lg p-6">
+        <div class="text-sm text-slate-400 mb-4">
+         FALL (Sep-Nov)
+        </div>
+        <div class="space-y-3">
+         <div>
+          <div class="flex justify-between mb-1"><span class="text-xs text-slate-400">Fixed</span> <span class="text-xs text-slate-400">100%</span>
+          </div>
+          <div class="w-full h-2 rounded bg-slate-800">
+           <div class="h-full bg-slate-600 rounded" style="width: 100%"></div>
+          </div>
+         </div>
+         <div>
+          <div class="flex justify-between mb-1"><span class="text-xs text-slate-400">Single-Axis</span> <span class="text-xs text-blue-400">122%</span>
+          </div>
+          <div class="w-full h-2 rounded bg-slate-800">
+           <div class="h-full bg-blue-500 rounded" style="width: 122%"></div>
+          </div>
+         </div>
+         <div>
+          <div class="flex justify-between mb-1"><span class="text-xs text-slate-400">Dual-Axis</span> <span class="text-xs text-amber-400">140%</span>
+          </div>
+          <div class="w-full h-2 rounded bg-slate-800">
+           <div class="h-full bg-amber-400 rounded" style="width: 140%"></div>
+          </div>
+         </div>
+        </div>
+       </div><!-- Winter -->
+       <div class="bg-slate-950/50 border border-slate-700 rounded-lg p-6">
+        <div class="text-sm text-slate-400 mb-4">
+         WINTER (Dec-Feb)
+        </div>
+        <div class="space-y-3">
+         <div>
+          <div class="flex justify-between mb-1"><span class="text-xs text-slate-400">Fixed</span> <span class="text-xs text-slate-400">100%</span>
+          </div>
+          <div class="w-full h-2 rounded bg-slate-800">
+           <div class="h-full bg-slate-600 rounded" style="width: 100%"></div>
+          </div>
+         </div>
+         <div>
+          <div class="flex justify-between mb-1"><span class="text-xs text-slate-400">Single-Axis</span> <span class="text-xs text-blue-400">125%</span>
+          </div>
+          <div class="w-full h-2 rounded bg-slate-800">
+           <div class="h-full bg-blue-500 rounded" style="width: 125%"></div>
+          </div>
+         </div>
+         <div>
+          <div class="flex justify-between mb-1"><span class="text-xs text-slate-400">Dual-Axis</span> <span class="text-xs text-amber-400">145%</span>
+          </div>
+          <div class="w-full h-2 rounded bg-slate-800">
+           <div class="h-full bg-amber-400 rounded" style="width: 145%"></div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </section>
+    <div class="mono text-xs text-amber-400 mb-3">
+     // WORKING PRINCIPLE
+    </div>
+    <h2 class="text-4xl font-bold mb-4">How it works</h2>
+    <p class="text-slate-400 max-w-2xl mx-auto">A continuous feedback loop keeps the panel perfectly aligned with the brightest light source.</p>
+   </main>
+  </div>
+  <div class="grid md:grid-cols-4 gap-6">
+   <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6 card-hover">
+    <div class="w-12 h-12 rounded-lg bg-amber-400/10 border border-amber-400/30 flex items-center justify-center mb-4"><i data-lucide="eye" class="w-6 h-6 text-amber-400"></i>
+    </div>
+    <div class="mono text-xs text-slate-500 mb-2">
+     STEP 01
+    </div>
+    <h3 class="font-bold mb-2">Sense</h3>
+    <p class="text-sm text-slate-400">Four LDRs detect light intensity from different directions around the panel.</p>
+   </div>
+   <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6 card-hover">
+    <div class="w-12 h-12 rounded-lg bg-amber-400/10 border border-amber-400/30 flex items-center justify-center mb-4"><i data-lucide="cpu" class="w-6 h-6 text-amber-400"></i>
+    </div>
+    <div class="mono text-xs text-slate-500 mb-2">
+     STEP 02
+    </div>
+    <h3 class="font-bold mb-2">Compare</h3>
+    <p class="text-sm text-slate-400">Arduino reads sensor values and calculates the direction of strongest sunlight.</p>
+   </div>
+   <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6 card-hover">
+    <div class="w-12 h-12 rounded-lg bg-amber-400/10 border border-amber-400/30 flex items-center justify-center mb-4"><i data-lucide="rotate-3d" class="w-6 h-6 text-amber-400"></i>
+    </div>
+    <div class="mono text-xs text-slate-500 mb-2">
+     STEP 03
+    </div>
+    <h3 class="font-bold mb-2">Rotate</h3>
+    <p class="text-sm text-slate-400">Servo motors adjust the panel on horizontal and vertical axes.</p>
+   </div>
+   <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-6 card-hover">
+    <div class="w-12 h-12 rounded-lg bg-amber-400/10 border border-amber-400/30 flex items-center justify-center mb-4"><i data-lucide="zap" class="w-6 h-6 text-amber-400"></i>
+    </div>
+    <div class="mono text-xs text-slate-500 mb-2">
+     STEP 04
+    </div>
+    <h3 class="font-bold mb-2">Harvest</h3>
+    <p class="text-sm text-slate-400">Panel faces the sun directly, maximizing photovoltaic output.</p>
+   </div>
+  </div><!-- COMPONENTS -->
+  <section id="components" class="max-w-7xl mx-auto px-6 py-16">
+   <div class="text-center mb-12">
+    <div class="mono text-xs text-amber-400 mb-3">
+     // HARDWARE
+    </div>
+    <h2 class="text-4xl font-bold mb-4">Components used</h2>
+    <p class="text-slate-400">Every part of the build, engineered to work together.</p>
+   </div>
+   <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5 flex gap-4 card-hover">
+     <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-teal-400/20 to-teal-600/20 border border-teal-400/30 flex items-center justify-center flex-shrink-0"><i data-lucide="cpu" class="w-6 h-6 text-teal-400"></i>
+     </div>
+     <div>
+      <h4 class="font-semibold">Arduino UNO</h4>
+      <p class="text-sm text-slate-400 mt-1">Microcontroller brain of the system</p>
+     </div>
+    </div>
+    <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5 flex gap-4 card-hover">
+     <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-amber-400/20 to-orange-500/20 border border-amber-400/30 flex items-center justify-center flex-shrink-0"><i data-lucide="sun" class="w-6 h-6 text-amber-400"></i>
+     </div>
+     <div>
+      <h4 class="font-semibold">LDR Sensors (×4)</h4>
+      <p class="text-sm text-slate-400 mt-1">Detect light intensity in all directions</p>
+     </div>
+    </div>
+    <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5 flex gap-4 card-hover">
+     <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-400/20 to-blue-600/20 border border-blue-400/30 flex items-center justify-center flex-shrink-0"><i data-lucide="rotate-3d" class="w-6 h-6 text-blue-400"></i>
+     </div>
+     <div>
+      <h4 class="font-semibold">Servo Motors (×2)</h4>
+      <p class="text-sm text-slate-400 mt-1">SG90 servos for dual-axis movement</p>
+     </div>
+    </div>
+    <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5 flex gap-4 card-hover">
+     <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-400/20 to-indigo-600/20 border border-indigo-400/30 flex items-center justify-center flex-shrink-0"><i data-lucide="battery-charging" class="w-6 h-6 text-indigo-400"></i>
+     </div>
+     <div>
+      <h4 class="font-semibold">Solar Panel</h4>
+      <p class="text-sm text-slate-400 mt-1">6V photovoltaic panel for power generation</p>
+     </div>
+    </div>
+    <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5 flex gap-4 card-hover">
+     <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-rose-400/20 to-rose-600/20 border border-rose-400/30 flex items-center justify-center flex-shrink-0"><i data-lucide="zap" class="w-6 h-6 text-rose-400"></i>
+     </div>
+     <div>
+      <h4 class="font-semibold">Resistors (10kΩ)</h4>
+      <p class="text-sm text-slate-400 mt-1">Voltage dividers for LDR readings</p>
+     </div>
+    </div>
+    <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-5 flex gap-4 card-hover">
+     <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-400/20 to-emerald-600/20 border border-emerald-400/30 flex items-center justify-center flex-shrink-0"><i data-lucide="circuit-board" class="w-6 h-6 text-emerald-400"></i>
+     </div>
+     <div>
+      <h4 class="font-semibold">Breadboard &amp; Wires</h4>
+      <p class="text-sm text-slate-400 mt-1">Prototyping and signal connections</p>
+     </div>
+    </div>
+   </div>
+  </section><!-- RESULTS -->
+  <section id="results" class="max-w-7xl mx-auto px-6 py-16">
+   <div class="bg-gradient-to-br from-slate-900 to-slate-900/50 border border-slate-800 rounded-2xl p-8 md:p-12">
+    <div class="grid md:grid-cols-2 gap-10 items-center">
+     <div>
+      <div class="mono text-xs text-amber-400 mb-3">
+       // OUTCOMES
+      </div>
+      <h2 class="text-4xl font-bold mb-6">Performance results</h2>
+      <p class="text-slate-300 mb-8">Field testing demonstrated significant performance improvements over fixed-position solar panels across all tested conditions.</p>
+      <div class="space-y-4">
+       <div>
+        <div class="flex justify-between mb-2"><span class="text-sm text-slate-300">Fixed Panel Output</span> <span class="mono text-sm text-slate-400">60%</span>
+        </div>
+        <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+         <div class="h-full bg-slate-600 rounded-full" style="width: 60%"></div>
+        </div>
+       </div>
+       <div>
+        <div class="flex justify-between mb-2"><span class="text-sm text-slate-300">Solar Tracker Output</span> <span class="mono text-sm text-amber-400">94%</span>
+        </div>
+        <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+         <div class="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full" style="width: 94%"></div>
+        </div>
+       </div>
+      </div>
+     </div>
+     <div class="grid grid-cols-2 gap-4">
+      <div class="bg-slate-950/50 border border-slate-800 rounded-xl p-6"><i data-lucide="trending-up" class="w-6 h-6 text-amber-400 mb-3"></i>
+       <div class="text-3xl font-bold gradient-text">
+        +40%
+       </div>
+       <div class="text-xs text-slate-400 mt-1">
+        Energy Gain
+       </div>
+      </div>
+      <div class="bg-slate-950/50 border border-slate-800 rounded-xl p-6"><i data-lucide="clock" class="w-6 h-6 text-amber-400 mb-3"></i>
+       <div class="text-3xl font-bold gradient-text">
+        12h
+       </div>
+       <div class="text-xs text-slate-400 mt-1">
+        Daily Tracking
+       </div>
+      </div>
+      <div class="bg-slate-950/50 border border-slate-800 rounded-xl p-6"><i data-lucide="activity" class="w-6 h-6 text-amber-400 mb-3"></i>
+       <div class="text-3xl font-bold gradient-text">
+        &lt;2s
+       </div>
+       <div class="text-xs text-slate-400 mt-1">
+        Response Time
+       </div>
+      </div>
+      <div class="bg-slate-950/50 border border-slate-800 rounded-xl p-6"><i data-lucide="leaf" class="w-6 h-6 text-amber-400 mb-3"></i>
+       <div class="text-3xl font-bold gradient-text">
+        100%
+       </div>
+       <div class="text-xs text-slate-400 mt-1">
+        Clean Energy
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </section><!-- CONTACT / CTA -->
+  <section id="contact" class="max-w-7xl mx-auto px-6 py-16">
+   <div class="relative overflow-hidden rounded-2xl border border-amber-400/30 bg-gradient-to-br from-amber-400/10 via-orange-500/5 to-transparent p-10 md:p-16 text-center">
+    <div class="absolute -top-20 -right-20 w-64 h-64 sun-glow opacity-40"></div>
+    <div class="relative"><i data-lucide="sun" class="w-12 h-12 text-amber-400 mx-auto mb-4"></i>
+     <h2 class="text-3xl md:text-4xl font-bold mb-4">Interested in this project?</h2>
+     <p class="text-slate-300 mb-8 max-w-xl mx-auto">Feel free to reach out for collaboration, technical details, or to see the full project documentation.</p>
+     <div class="flex flex-wrap justify-center gap-4"><a href="mailto:your.email@example.com" class="px-6 py-3 bg-amber-400 text-slate-900 rounded-lg font-semibold hover:bg-amber-300 transition flex items-center gap-2"> <i data-lucide="mail" class="w-4 h-4"></i> Contact Me </a> <a href="#" target="_blank" rel="noopener noreferrer" class="px-6 py-3 border border-slate-700 rounded-lg font-semibold hover:border-amber-400 hover:text-amber-400 transition flex items-center gap-2"> <i data-lucide="github" class="w-4 h-4"></i> View Code </a>
+     </div>
+    </div>
+   </div>
+  </section><!-- FOOTER -->
+  <footer class="border-t border-slate-800 mt-12">
+   <div class="max-w-7xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-2">
+     <div class="w-7 h-7 rounded-md bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center"><i data-lucide="sun" class="w-4 h-4 text-slate-900"></i>
+     </div><span class="font-bold text-sm">SolarTrack<span class="text-amber-400">Pro</span></span>
+    </div>
+    <p id="footer-text" class="text-sm text-slate-400">© 2025 Automatic Solar Tracker Project. Powered by the sun.</p>
+   </div>
+  </footer>
+  <script>
+  lucide.createIcons();
+
+  const defaultConfig = {
+    hero_title: "Automatic Solar Tracker System",
+    hero_subtitle: "Smart dual-axis tracking for maximum solar energy harvest",
+    hero_tagline: "Follows the sun from dawn to dusk — boosting efficiency by up to 40% compared to fixed panels.",
+    team_title: "Meet the Team",
+    team_subtitle: "Brilliant minds collaborating to bring solar innovation to life.",
+    about_title: "Engineered to follow the sun",
+    about_description: "The Automatic Solar Tracker System is an intelligent electromechanical device designed to keep a solar panel perpendicular to the sun throughout the day. Using light-dependent resistors (LDRs) and a microcontroller, it continuously adjusts the panel's orientation to capture maximum sunlight — significantly outperforming stationary panels.",
+    footer_text: "© 2025 Automatic Solar Tracker Project. Powered by the sun."
+  };
+
+  function renderHeroTitle(text) {
+    // Highlight "Solar Tracker" if present
+    const el = document.getElementById('hero-title');
+    if (text.toLowerCase().includes('solar tracker')) {
+      const parts = text.split(/solar tracker/i);
+      el.innerHTML = parts[0] + '<span class="gradient-text">Solar Tracker</span>' + (parts[1] || '');
+    } else {
+      el.textContent = text;
+    }
+  }
+
+  if (window.elementSdk) {
+    window.elementSdk.init({
+      defaultConfig,
+      onConfigChange: async (config) => {
+        renderHeroTitle(config.hero_title || defaultConfig.hero_title);
+        document.getElementById('hero-subtitle').textContent = config.hero_subtitle || defaultConfig.hero_subtitle;
+        document.getElementById('hero-tagline').textContent = config.hero_tagline || defaultConfig.hero_tagline;
+        document.getElementById('team-title').textContent = config.team_title || defaultConfig.team_title;
+        document.getElementById('team-subtitle').textContent = config.team_subtitle || defaultConfig.team_subtitle;
+        document.getElementById('about-title').textContent = config.about_title || defaultConfig.about_title;
+        document.getElementById('about-description').textContent = config.about_description || defaultConfig.about_description;
+        document.getElementById('footer-text').textContent = config.footer_text || defaultConfig.footer_text;
+      },
+      mapToCapabilities: () => ({
+        recolorables: [],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      }),
+      mapToEditPanelValues: (config) => new Map([
+        ["hero_title", config.hero_title || defaultConfig.hero_title],
+        ["hero_subtitle", config.hero_subtitle || defaultConfig.hero_subtitle],
+        ["hero_tagline", config.hero_tagline || defaultConfig.hero_tagline],
+        ["team_title", config.team_title || defaultConfig.team_title],
+        ["team_subtitle", config.team_subtitle || defaultConfig.team_subtitle],
+        ["about_title", config.about_title || defaultConfig.about_title],
+        ["about_description", config.about_description || defaultConfig.about_description],
+        ["footer_text", config.footer_text || defaultConfig.footer_text]
+      ])
+    });
+  }
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f48cee8311b49a0',t:'MTc3NzU3NTgyNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
